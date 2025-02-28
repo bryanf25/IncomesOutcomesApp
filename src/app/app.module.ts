@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { isDevMode, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -18,6 +18,10 @@ import { environment } from '../environments/environment.development';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
+import { StoreModule } from '@ngrx/store';
+import { provideStoreDevtools, StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { appReducers } from './app.reducer'
+
 
 
 @NgModule({
@@ -37,7 +41,9 @@ import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
     BrowserModule,
     AppRoutingModule,
     ReactiveFormsModule,
-    SweetAlert2Module.forRoot()
+    SweetAlert2Module.forRoot(),
+    StoreModule.forRoot(appReducers),
+    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode()})
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig) ),

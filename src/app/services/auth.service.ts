@@ -4,37 +4,56 @@ import {
   signInWithEmailAndPassword,
   UserCredential
 } from '@angular/fire/auth';
-import { Firestore } from '@angular/fire/firestore';
+import { collectionData, Firestore, onSnapshot } from '@angular/fire/firestore';
 
-import { map } from 'rxjs'
+import { map, Observable } from 'rxjs'
 import { User } from '../models/user.model';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, doc, getDoc, setDoc, } from 'firebase/firestore';
+import { Store } from '@ngrx/store';
+import * as authActions from '../auth/auth.actions'
+import { AppState } from '../app.reducer';
 
 @Injectable({
   providedIn: 'root'
 })
+
+
+
 export class AuthService {
 
-  constructor(private auth: Auth, private firestore: Firestore) { }
+  users$!: Observable<UserProfile[]>;
+
+
+  constructor(private auth: Auth, private firestore: Firestore, private store: Store<AppState>) { }
 
 
   initAuthListener() {
-    authState(this.auth).subscribe((fireUser) => {
-      console.log(fireUser)
+    authState(this.auth).subscribe(async (fireUser) => {
+      if (fireUser) {
+        const userRef = doc(this.firestore, "user", fireUser.uid);
+        const userSnap = await getDoc(userRef);
+        const user = userSnap.data() as User;
+
+        this.store.dispatch(authActions.setUser({ user }));
+
+      } else {
+        this.store.dispatch(authActions.unSetUser())
+      }
     })
 
   }
 
   createUser(name: string, email: string, password: string): Promise<UserCredential | any> {
     return createUserWithEmailAndPassword(this.auth, email, password)
-      .then(({ user }) => {
-        const newUser: User =  {
+      .then(async ({ user }) => {
+        const newUser: User = {
           uid: user.uid,
           email: email,
-          name : name
+          name: name
         }
-        const refUser = collection(this.firestore,'user')
-        return addDoc(refUser,newUser)
+        const refUser = doc(this.firestore, 'user', user.uid)
+        await setDoc(refUser, newUser)
+        return newUser
       }).catch(err => err)
   }
 
@@ -55,4 +74,8 @@ export class AuthService {
 
 
 
+}
+
+export interface UserProfile {
+  username: string;
 }
