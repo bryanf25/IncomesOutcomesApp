@@ -1,16 +1,17 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Auth, authState, createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   UserCredential
 } from '@angular/fire/auth';
-import { collectionData, Firestore, onSnapshot } from '@angular/fire/firestore';
+import { docData, Firestore } from '@angular/fire/firestore';
 
-import { map, Observable } from 'rxjs'
+import { map } from 'rxjs'
 import { User } from '../models/user.model';
-import { addDoc, doc, getDoc, setDoc, } from 'firebase/firestore';
+import {  doc, setDoc, } from 'firebase/firestore';
 import { Store } from '@ngrx/store';
 import * as authActions from '../auth/auth.actions'
+import * as ieActions from '../incomes-expenses/incomes-expenses.actions'
 import { AppState } from '../app.reducer';
 
 @Injectable({
@@ -21,26 +22,34 @@ import { AppState } from '../app.reducer';
 
 export class AuthService {
 
-  users$!: Observable<UserProfile[]>;
+  private firestore = inject(Firestore)
+  // users$!: Observable<UserProfile[]>;
+  private _user!: User | null;
 
+  constructor(private auth: Auth, private store: Store<AppState>) { }
 
-  constructor(private auth: Auth, private firestore: Firestore, private store: Store<AppState>) { }
-
+  get user(){
+    return this._user;
+  }
 
   initAuthListener() {
-    authState(this.auth).subscribe(async (fireUser) => {
+    authState(this.auth).subscribe( (fireUser) => {
       if (fireUser) {
         const userRef = doc(this.firestore, "user", fireUser.uid);
-        const userSnap = await getDoc(userRef);
-        const user = userSnap.data() as User;
+        docData(userRef).subscribe((user)=>{
+          const userTemp = user as User;
+          this._user = userTemp
+          this.store.dispatch(authActions.setUser({ user: userTemp }));
 
-        this.store.dispatch(authActions.setUser({ user }));
+        });
+
 
       } else {
+        this._user = null
         this.store.dispatch(authActions.unSetUser())
+        this.store.dispatch(ieActions.unSetItems())
       }
     })
-
   }
 
   createUser(name: string, email: string, password: string): Promise<UserCredential | any> {

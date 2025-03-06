@@ -19,8 +19,11 @@ import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { SweetAlert2Module } from '@sweetalert2/ngx-sweetalert2';
 import { StoreModule } from '@ngrx/store';
-import { provideStoreDevtools, StoreDevtoolsModule } from '@ngrx/store-devtools';
-import { appReducers } from './app.reducer'
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { appReducers } from './app.reducer';
+import { IncomeExpenseTransformPipe } from './pipes/income-expense-transform.pipe';
+import { OrderIncomePipe } from './pipes/order-income.pipe';
+import { BaseChartDirective, provideCharts, withDefaultRegisterables } from 'ng2-charts'
 
 
 
@@ -35,7 +38,9 @@ import { appReducers } from './app.reducer'
     DetailsComponent,
     FooterComponent,
     NavbarComponent,
-    SidebarComponent
+    SidebarComponent,
+    IncomeExpenseTransformPipe,
+    OrderIncomePipe
   ],
   imports: [
     BrowserModule,
@@ -43,12 +48,14 @@ import { appReducers } from './app.reducer'
     ReactiveFormsModule,
     SweetAlert2Module.forRoot(),
     StoreModule.forRoot(appReducers),
-    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode()})
+    StoreDevtoolsModule.instrument({ maxAge: 25, logOnly: !isDevMode()}),
+    BaseChartDirective
   ],
   providers: [
     provideFirebaseApp(() => initializeApp(environment.firebaseConfig) ),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
+    provideCharts(withDefaultRegisterables()),
   ],
   bootstrap: [AppComponent]
 })
