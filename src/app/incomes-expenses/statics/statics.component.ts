@@ -4,7 +4,7 @@ import { AppState } from '../../app.reducer';
 import { Subscription, tap } from 'rxjs';
 import { IncomeExpense } from '../../models/income-expense.model';
 import { ChartData, ChartEvent, ChartType } from 'chart.js';
-import { BaseChartDirective } from 'ng2-charts';
+import { AppStateWithIncomes } from '../incomes-expenses.reducer';
 
 @Component({
   selector: 'app-statics',
@@ -44,7 +44,7 @@ export class StaticsComponent implements OnInit, OnDestroy {
     console.log(event, active);
   }
 
-  constructor(private store: Store<AppState>) { }
+  constructor(private store: Store<AppStateWithIncomes>) { }
 
 
   ngOnInit() {

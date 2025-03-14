@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import * as uiActions from '../../shared/ui.actions'
 
 import Swal from 'sweetalert2';
+import { AppStateWithIncomes } from '../incomes-expenses.reducer';
 
 @Component({
   selector: 'app-details',
@@ -18,11 +19,11 @@ import Swal from 'sweetalert2';
 export class DetailsComponent implements OnInit, OnDestroy {
   
 
-  incomesExpenses!: IncomeExpense[]
+  incomesExpenses: IncomeExpense[] = []
   ieSubscription$!: Subscription
   loading: boolean = false;
 
-  constructor(private store: Store<AppState>,
+  constructor(private store: Store<AppStateWithIncomes>,
     private incomeExpenseService: IncomeExpenseService,
     private authService: AuthService) { }
 

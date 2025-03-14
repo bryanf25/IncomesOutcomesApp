@@ -33,6 +33,7 @@ export class AuthService {
   }
 
   initAuthListener() {
+    debugger
     authState(this.auth).subscribe( (fireUser) => {
       if (fireUser) {
         const userRef = doc(this.firestore, "user", fireUser.uid);
